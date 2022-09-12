@@ -2,42 +2,75 @@
 
 fn main() {
     // let input: Vec<Result<i32, std::io::Error>>  =  std::fs::read_to_string("./input.txt")
-    let input: Vec<(String, i32)> = std::fs::read_to_string("./input_two.txt")
-        .expect("file not found!")
-        .lines()
-        .map(|x| {
-            return sscanf::scanf!(x, "{} {}", String, i32).unwrap();
-        })
-        .collect();
 
-    let answer: (i32, i32, i32) =
-        (&input)
-            .into_iter()
-            .enumerate()
-            .fold((0, 0, 0), |result, (_, value)| {
-                let (mut horizontal, mut vertical, mut aim) = result;
-                let (movement, distance) = &*value;
-                /*
-                    forward X does two things:
-                      It increases your horizontal position by X units.
-                      It increases your depth by your aim multiplied by X.
+    let input = std::fs::read_to_string("./input.txt").expect("file not found!");
 
-                    down X increases the depth by X units.
-                    up X decreases the depth by X units.
+    fn reduce_mostcommon(input: Vec<&str>, index: usize) -> Vec<&str> {
+        // found the number
+        if input.len() == 1 {
+            return input;
+        }
 
-                */
-                if movement == "forward" {
-                    horizontal = horizontal + distance;
-                    vertical = vertical + (aim * distance);
-                } else if movement == "up" {
-                    aim = aim - distance;
-                } else if movement == "down" {
-                    aim = aim + distance;
-                } else {
-                    panic!("unknown movement")
-                }
+        let one_count = input.iter().fold(0, |sum, row| {
+            if row.chars().nth(index).unwrap() == '1' {
+                return sum + 1;
+            }
+            return sum;
+        });
 
-                return (horizontal, vertical, aim);
-            });
-    println!("{}", answer.0 * answer.1);
+        if one_count > (input.len() / 2) {
+            return reduce_mostcommon(
+                input
+                    .into_iter()
+                    .filter(|row| return row.chars().nth(index).unwrap() == '1')
+                    .collect(),
+                index + 1,
+            );
+        } else {
+            return reduce_mostcommon(
+                input
+                    .into_iter()
+                    .filter(|row| return row.chars().nth(index).unwrap() != '1')
+                    .collect(),
+                index + 1,
+            );
+        }
+    }
+
+    let oxygen = reduce_mostcommon(input.lines().collect(), 0);
+
+    fn reduce_leastcommon(input: Vec<&str>, index: usize) -> Vec<&str> {
+        // found the number
+        if input.len() == 1 {
+            return input;
+        }
+
+        let one_count = input.iter().fold(0, |sum, row| {
+            if row.chars().nth(index).unwrap() == '1' {
+                return sum + 1;
+            }
+            return sum;
+        });
+
+        if one_count < (input.len() / 2) {
+            return reduce_leastcommon(
+                input
+                    .into_iter()
+                    .filter(|row| return row.chars().nth(index).unwrap() == '1')
+                    .collect(),
+                index + 1,
+            );
+        } else {
+            return reduce_leastcommon(
+                input
+                    .into_iter()
+                    .filter(|row| return row.chars().nth(index).unwrap() != '1')
+                    .collect(),
+                index + 1,
+            );
+        }
+    }
+    let c02 = reduce_leastcommon(input.lines().collect(), 0);
+
+    // todo convert most common and least common into decimal and then mult them
 }
